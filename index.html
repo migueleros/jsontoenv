@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON to .env Converter</title>
+</head>
+<body>
+    <h1>JSON to .env Converter</h1>
+    <textarea id="jsonInput" rows="10" cols="50" placeholder="Paste your JSON here"></textarea><br><br>
+    <button onclick="convertToEnv()">Convert to .env</button>
+    <a id="downloadLink" style="display:none;">Download .env file</a>
+
+    <script>
+        function convertToEnv() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            let jsonObject;
+
+            try {
+                jsonObject = JSON.parse(jsonInput);
+            } catch (error) {
+                alert('Invalid JSON');
+                return;
+            }
+
+            let envContent = '';
+            for (const key in jsonObject) {
+                if (jsonObject.hasOwnProperty(key)) {
+                    const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, ''); 
+                    const sanitizedValue = jsonObject[key].toString().replace(/"/g, '\\"'); 
+                    envContent += `${sanitizedKey}="${sanitizedValue}"\n`;
+                }
+            }
+
+            const blob = new Blob([envContent], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = url;
+            downloadLink.download = '.env'; 
+            downloadLink.style.display = 'block';
+            downloadLink.innerHTML = 'Download .env file';
+        }
+    </script>
+</body>
+</html>
