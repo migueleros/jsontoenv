@@ -4,12 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON to .env Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+        }
+        textarea {
+            width: 80%;
+            max-width: 600px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button, a, #copyButton {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button:hover, a:hover, #copyButton:hover {
+            background-color: #0056b3;
+        }
+        a {
+            display: none;
+        }
+        #outputContainer {
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        #envOutput {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            white-space: pre-wrap;
+        }
+    </style>
 </head>
 <body>
     <h1>JSON to .env Converter</h1>
-    <textarea id="jsonInput" rows="10" cols="50" placeholder="Paste your JSON here"></textarea><br><br>
+    <textarea id="jsonInput" rows="10" placeholder="Paste your JSON here"></textarea><br>
     <button onclick="convertToEnv()">Convert to .env</button>
-    <a id="downloadLink" style="display:none;">Download .env file</a>
+    <a id="downloadLink">Download .env file</a>
+    <div id="outputContainer">
+        <textarea id="envOutput" rows="10" readonly></textarea>
+        <button id="copyButton" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
 
     <script>
         function convertToEnv() {
@@ -39,7 +100,18 @@
             downloadLink.href = url;
             downloadLink.download = '.env'; 
             downloadLink.style.display = 'block';
-            downloadLink.innerHTML = 'Download .env file';
+
+            const outputContainer = document.getElementById('outputContainer');
+            const envOutput = document.getElementById('envOutput');
+            envOutput.value = envContent;
+            outputContainer.style.display = 'flex';
+        }
+
+        function copyToClipboard() {
+            const envOutput = document.getElementById('envOutput');
+            envOutput.select();
+            document.execCommand('copy');
+            alert('Copied to clipboard');
         }
     </script>
 </body>
