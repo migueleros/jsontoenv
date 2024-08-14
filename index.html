@@ -81,12 +81,13 @@
     </style>
 </head>
 <body>
-    <h1>JSON & Env Tools</h1>
+    <h1 id="pageTitle">JSON & Env Tools</h1>
     <div id="container">
         <textarea id="jsonInput" placeholder="Paste your JSON here"></textarea>
         <div id="convert-options">
-            <button onclick="convertToEnv()">Convert to .env</button>
-            <button onclick="prettify()">Prettify</button>
+            <button id="convertButton" onclick="convert()">Convert to .env</button>
+            <button id="prettifyButton" onclick="prettify()">Prettify</button>
+            <button onclick="swapMode()">Swap</button>
         </div>
         <div id="outputContainer">
             <textarea id="envOutput" readonly></textarea>
@@ -99,6 +100,16 @@
     </div>
 
     <script>
+        let mode = 'json-to-env';
+
+        function convert() {
+            if (mode === 'json-to-env') {
+                convertToEnv();
+            } else {
+                convertToJson();
+            }
+        }
+
         function convertToEnv() {
             const jsonInput = document.getElementById('jsonInput').value;
             let jsonObject;
@@ -123,6 +134,7 @@
             const url = URL.createObjectURL(blob);
 
             const downloadLink = document.getElementById('downloadLink');
+            downloadLink.textContent = "Download .env file";
             downloadLink.href = url;
             downloadLink.download = '.env'; 
             downloadLink.style.display = 'block';
@@ -134,17 +146,35 @@
             copyButton.style.display = 'inline-block';
         }
 
-        function copyToClipboard() {
+        function convertToJson() {
+            const envInput = document.getElementById('jsonInput').value;
+            const lines = envInput.split('\n');
+            const jsonObject = {};
+
+            lines.forEach(line => {
+                const [key, value] = line.split('=');
+                if (key && value) {
+                    const sanitizedKey = key.trim();
+                    const sanitizedValue = value.trim().replace(/^"|"$/g, '').replace(/\\"/g, '"');
+                    jsonObject[sanitizedKey] = sanitizedValue;
+                }
+            });
+
+            const jsonOutput = JSON.stringify(jsonObject, null, 4);
+            const blob = new Blob([jsonOutput], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.textContent = "Download JSON file";
+            downloadLink.href = url;
+            downloadLink.download = 'output.json';
+            downloadLink.style.display = 'block';
+
             const envOutput = document.getElementById('envOutput');
+            envOutput.value = jsonOutput;
+
             const copyButton = document.getElementById('copyButton');
-
-            envOutput.select();
-            document.execCommand('copy');
-
-            copyButton.innerText = 'Copied!';
-            setTimeout(() => {
-                copyButton.innerText = 'Copy to Clipboard';
-            }, 2000);
+            copyButton.style.display = 'inline-block';
         }
 
         function prettify() {
@@ -160,6 +190,48 @@
 
             const prettyJson = JSON.stringify(jsonObject, null, 4);
             document.getElementById('jsonInput').value = prettyJson;
+        }
+
+        function copyToClipboard() {
+            const envOutput = document.getElementById('envOutput');
+            const copyButton = document.getElementById('copyButton');
+
+            envOutput.select();
+            document.execCommand('copy');
+
+            copyButton.innerText = 'Copied!';
+            setTimeout(() => {
+                copyButton.innerText = 'Copy to Clipboard';
+            }, 2000);
+        }
+
+        function swapMode() {
+            const jsonInput = document.getElementById('jsonInput');
+            const envOutput = document.getElementById('envOutput');
+            const convertButton = document.getElementById('convertButton');
+            const prettifyButton = document.getElementById('prettifyButton');
+            const pageTitle = document.getElementById('pageTitle');
+
+            if (mode === 'json-to-env') {
+                mode = 'env-to-json';
+                convertButton.innerText = 'Convert to JSON';
+                jsonInput.placeholder = 'Paste your .env content here';
+                envOutput.placeholder = 'JSON output';
+                pageTitle.innerText = '.env to JSON Converter';
+                prettifyButton.style.display = 'none';
+            } else {
+                mode = 'json-to-env';
+                convertButton.innerText = 'Convert to .env';
+                jsonInput.placeholder = 'Paste your JSON here';
+                envOutput.placeholder = '.env output';
+                pageTitle.innerText = 'JSON to .env Converter';
+                prettifyButton.style.display = 'inline-block';
+            }
+
+            jsonInput.value = '';
+            envOutput.value = '';
+            document.getElementById('downloadLink').style.display = 'none';
+            document.getElementById('copyButton').style.display = 'none';
         }
     </script>
 </body>
