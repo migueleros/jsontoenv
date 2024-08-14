@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON to .env Converter</title>
+    <title>JSON & Env Tools</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,19 +15,31 @@
             margin: 0;
             background-color: #f4f4f4;
         }
+
         h1 {
             color: #333;
+            margin-bottom: 50px;
         }
+
+        #container {
+            display: flex;
+            column-gap: 50px;
+            width: fit-content;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
         textarea {
-            width: 80%;
-            max-width: 600px;
+            width: 300px;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            background-color: #fff;
+            height: 300px;
         }
-        button, a, #copyButton {
-            margin-top: 15px;
+
+        button, a {
             padding: 10px 20px;
             font-size: 16px;
             color: #fff;
@@ -37,39 +49,53 @@
             text-decoration: none;
             cursor: pointer;
         }
-        button:hover, a:hover, #copyButton:hover {
+
+        button:hover, a:hover {
             background-color: #0056b3;
         }
+
         a {
             display: none;
         }
+        
         #outputContainer {
-            width: 80%;
-            max-width: 600px;
-            margin-top: 20px;
-            display: none;
+            width: 300px;
+            display: flex;
             flex-direction: column;
             align-items: flex-start;
         }
-        #envOutput {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #fff;
-            white-space: pre-wrap;
+
+        #copyButton {
+            display: none;
+            margin-top: 15px;
+        }
+
+        #options,
+        #convert-options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            row-gap: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>JSON to .env Converter</h1>
-    <textarea id="jsonInput" rows="10" placeholder="Paste your JSON here"></textarea><br>
-    <button onclick="convertToEnv()">Convert to .env</button>
-    <a id="downloadLink">Download .env file</a>
-    <div id="outputContainer">
-        <textarea id="envOutput" rows="10" readonly></textarea>
+    <h1>JSON & Env Tools</h1>
+    <div id="container">
+        <textarea id="jsonInput" placeholder="Paste your JSON here"></textarea>
+        <div id="convert-options">
+            <button onclick="convertToEnv()">Convert to .env</button>
+            <button onclick="prettify()">Prettify</button>
+        </div>
+        <div id="outputContainer">
+            <textarea id="envOutput" readonly></textarea>
+        </div>
+    </div>
+
+    <div id="options">
         <button id="copyButton" onclick="copyToClipboard()">Copy to Clipboard</button>
+        <a id="downloadLink">Download .env file</a>
     </div>
 
     <script>
@@ -101,17 +127,39 @@
             downloadLink.download = '.env'; 
             downloadLink.style.display = 'block';
 
-            const outputContainer = document.getElementById('outputContainer');
             const envOutput = document.getElementById('envOutput');
             envOutput.value = envContent;
-            outputContainer.style.display = 'flex';
+
+            const copyButton = document.getElementById('copyButton');
+            copyButton.style.display = 'inline-block';
         }
 
         function copyToClipboard() {
             const envOutput = document.getElementById('envOutput');
+            const copyButton = document.getElementById('copyButton');
+
             envOutput.select();
             document.execCommand('copy');
-            alert('Copied to clipboard');
+
+            copyButton.innerText = 'Copied!';
+            setTimeout(() => {
+                copyButton.innerText = 'Copy to Clipboard';
+            }, 2000);
+        }
+
+        function prettify() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            let jsonObject;
+
+            try {
+                jsonObject = JSON.parse(jsonInput);
+            } catch (error) {
+                alert('Invalid JSON');
+                return;
+            }
+
+            const prettyJson = JSON.stringify(jsonObject, null, 4);
+            document.getElementById('jsonInput').value = prettyJson;
         }
     </script>
 </body>
